@@ -1,27 +1,73 @@
 /* src/pages/Dashboard.css */
-html, body {
-    background-color: #f4f7f6;
-  }
-/* 1. Style untuk Halaman Dashboard Utama */
-.dashboard-container {
-    padding: 20px;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    max-width: 900px; /* Batasi lebar agar rapi di desktop */
-    margin: 0 auto; /* Tengah di desktop */
+html {
+    scroll-behavior: smooth;
   }
   
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  /* === DARK MODE === */
+  body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+  
+  /* 1. Dashboard Container */
+  .dashboard-container {
+    padding: 20px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  
+  /* Header */
   .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #eaeaea;
+    transition: border-color 0.3s;
+  }
+  
+  body.dark-mode .dashboard-header {
+    border-bottom-color: #333;
   }
   
   .dashboard-title {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 600;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .dark-mode-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s;
+  }
+  
+  body.dark-mode .dark-mode-toggle {
+    background: #2d2d2d;
+    border-color: #444;
   }
   
   .logout-button {
@@ -30,46 +76,72 @@ html, body {
     color: white;
     background-color: #d9534f;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
   }
   
   .logout-button:hover {
     background-color: #c9302c;
   }
   
-  /* 2. Style untuk Form (Upload & Search) */
-  /* Kita buat style 'card' yang bisa dipakai ulang */
+  /* Form Layout */
+  .form-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+  
   .form-card {
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #ffffff;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: box-shadow 0.3s;
+  }
+  
+  body.dark-mode .form-card {
+    background: #1e1e1e;
+    border-color: #333;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
   
   .form-card h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
+    margin: 0 0 15px;
     padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 600;
+    color: #444;
   }
   
-  /* Style untuk form di dalamnya */
+  body.dark-mode .form-card h3 {
+    border-bottom-color: #333;
+    color: #eee;
+  }
+  
   .form-layout {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Memberi jarak antar elemen form */
+    gap: 14px;
   }
   
   .form-input {
     width: 100%;
-    padding: 10px;
+    padding: 10px 12px;
     font-size: 16px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 6px;
+    background: white;
+    color: #333;
     box-sizing: border-box;
+  }
+  
+  body.dark-mode .form-input {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
   }
   
   .form-button {
@@ -78,12 +150,12 @@ html, body {
     color: white;
     background-color: #007bff;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s;
   }
   
-  .form-button:hover {
+  .form-button:hover:not(:disabled) {
     background-color: #0056b3;
   }
   
@@ -92,77 +164,303 @@ html, body {
     cursor: not-allowed;
   }
   
+  /* Upload Message */
   .upload-message {
-    margin-top: 10px;
+    margin-top: 12px;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: center;
     font-size: 15px;
   }
   
-  /* 3. Style untuk Daftar File (FileList) */
+  .upload-message.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .upload-message.error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+  }
+  
+  body.dark-mode .upload-message.success {
+    color: #a9f9a4;
+    background-color: #1b2a1b;
+    border-color: #2a4a2a;
+  }
+  
+  body.dark-mode .upload-message.error {
+    color: #ff9d9d;
+    background-color: #2a1b1b;
+    border-color: #4a2a2a;
+  }
+  
+  /* File List */
   .file-list-container h2 {
     margin-top: 0;
+    font-size: 22px;
+    color: #333;
   }
   
-  .file-list {
-    list-style: none;
-    padding: 0;
+  body.dark-mode .file-list-container h2 {
+    color: #eee;
   }
   
-  .file-item {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .file-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  body.dark-mode .file-table {
+    background: #1e1e1e;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  .file-table th,
+  .file-table td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  body.dark-mode .file-table th,
+  body.dark-mode .file-table td {
+    border-bottom-color: #333;
+  }
+  
+  .file-table th {
+    background: #fafafa;
+    font-weight: 600;
+    color: #495057;
+    font-size: 15px;
+  }
+  
+  body.dark-mode .file-table th {
+    background: #252525;
+    color: #ccc;
+  }
+  
+  .file-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .file-table tbody tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  body.dark-mode .file-table tbody tr:hover {
+    background-color: #2a2a2a;
+  }
+  
+  .file-table th:first-child,
+  .file-table td:first-child {
+    text-align: center;
+    width: 40px;
+    color: #777;
+    font-weight: normal;
+  }
+  
+  body.dark-mode .file-table th:first-child,
+  body.dark-mode .file-table td:first-child {
+    color: #aaa;
+  }
+  
+  .file-name-link {
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .file-name-link:hover {
+    color: #0056b3;
+  }
+  
+  body.dark-mode .file-name-link {
+    color: #4da6ff;
+  }
+  
+  body.dark-mode .file-name-link:hover {
+    color: #7fc8ff;
+  }
+  
+  .delete-button.small {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 5px;
+  }
+  
+  .empty-text,
+  .loading-text {
+    text-align: center;
+    padding: 24px;
+    color: #777;
+    font-size: 16px;
+  }
+  
+  body.dark-mode .empty-text,
+  body.dark-mode .loading-text {
+    color: #aaa;
+  }
+  
+  /* Skeleton */
+  .skeleton-table {
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  
+  .skeleton-row {
+    height: 56px;
+    background: #f0f0f0;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+  
+  body.dark-mode .skeleton-row {
+    background: #2a2a2a;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+  
+  /* Responsif */
+  @media (max-width: 600px) {
+    .dashboard-container {
+      padding: 16px;
+    }
+  
+    .file-table th:nth-child(2),
+    .file-table td:nth-child(2) {
+      display: none;
+    }
+  
+    .form-wrapper {
+      grid-template-columns: 1fr;
+    }
+  
+    .header-actions {
+      gap: 8px;
+    }
+  
+    .dark-mode-toggle {
+      width: 36px;
+      height: 36px;
+      font-size: 16px;
+    }
+  }
+
+  /* === PREVIEW MODAL === */
+.preview-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .preview-modal {
+    background: white;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  body.dark-mode .preview-modal {
+    background: #2a2a2a;
+  }
+  
+  .preview-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 10px;
+    padding: 16px;
     border-bottom: 1px solid #eee;
-    /* Animasi transisi saat hover */
-    transition: background-color 0.2s ease;
   }
   
-  .file-item:hover {
-    background-color: #fcfcfc;
+  body.dark-mode .preview-header {
+    border-bottom-color: #444;
   }
   
-  /* Responsif di HP */
-  @media (max-width: 600px) {
-    .file-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-    }
+  .preview-header h3 {
+    margin: 0;
+    font-size: 18px;
   }
   
-  .file-info .file-name {
-    font-weight: bold;
-    color: #007bff;
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 1.1em;
-  }
-  
-  .file-info .file-details {
-    font-size: 0.9em;
-    color: #555;
-    margin: 5px 0 0 0;
-  }
-  
-  .file-actions .delete-button {
-    padding: 5px 10px;
-    font-size: 14px;
-    color: white;
-    background-color: #d9534f;
+  .close-preview {
+    background: none;
     border: none;
-    border-radius: 5px;
+    font-size: 24px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .file-actions .delete-button:hover {
-    background-color: #c9302c;
-  }
-  
-  .loading-text,
-  .empty-text {
-    font-size: 16px;
     color: #777;
-    text-align: center;
-    padding: 20px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+  }
+  
+  .close-preview:hover {
+    background: #f0f0f0;
+  }
+  
+  body.dark-mode .close-preview {
+    color: #ccc;
+  }
+  
+  body.dark-mode .close-preview:hover {
+    background: #3a3a3a;
+  }
+  
+  .preview-content {
+    padding: 16px;
+    overflow: auto;
+    flex: 1;
+  }
+  
+  .preview-image {
+    max-width: 100%;
+    max-height: 60vh;
+    display: block;
+    margin: 0 auto;
+  }
+  
+  .preview-text {
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 14px;
+    color: #333;
+    max-height: 60vh;
+    overflow: auto;
+  }
+  
+  body.dark-mode .preview-text {
+    color: #e0e0e0;
   }

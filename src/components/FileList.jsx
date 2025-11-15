@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient.js';
 
-// Tidak perlu 'styles' atau impor CSS
-
 function FileList({ searchQuery }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,8 +9,10 @@ function FileList({ searchQuery }) {
     fetchFiles();
   }, [searchQuery]);
 
+  const [preview, setPreview] = useState(null); // { url, type, name }
+  const [previewLoading, setPreviewLoading] = useState(false);
+
   const fetchFiles = async () => {
-    // ... (Logika fetchFiles Anda tetap sama)
     setLoading(true);
     try {
       let query = supabase.from('files').select('*');
@@ -33,7 +33,6 @@ function FileList({ searchQuery }) {
   };
 
   const handleDownload = async (filePath) => {
-    // ... (Logika handleDownload Anda tetap sama)
     try {
       const { data, error } = await supabase.storage
         .from('files')
@@ -46,7 +45,6 @@ function FileList({ searchQuery }) {
   };
 
   const handleDelete = async (file) => {
-    // ... (Logika handleDelete Anda tetap sama)
     if (!window.confirm(`Anda yakin ingin menghapus ${file.fileName}?`)) {
       return;
     }
@@ -60,41 +58,92 @@ function FileList({ searchQuery }) {
     }
   };
 
+  // Tampilkan skeleton saat loading
   if (loading) {
-    return <p className="loading-text">Memuat file...</p>;
+    return (
+      <div className="skeleton-table">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="skeleton-row"></div>
+        ))}
+      </div>
+    );
   }
+
+  const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'pdf':
+        return '📄';
+      case 'doc':
+      case 'docx':
+        return '📝';
+      case 'xls':
+      case 'xlsx':
+        return '📊';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'webp':
+        return '🖼️';
+      case 'txt':
+      case 'md':
+        return '📃';
+      case 'zip':
+      case 'rar':
+      case '7z':
+        return '📦';
+      default:
+        return '📎';
+    }
+  };
 
   return (
     <div className="file-list-container">
-      <h2>File Saya</h2>
+      <h2>📄 File Saya</h2>
       {files.length === 0 ? (
         <p className="empty-text">Tidak ada file yang cocok dengan pencarian Anda.</p>
       ) : (
-        <ul className="file-list">
-          {files.map(file => (
-            <li key={file.id} className="file-item">
-              <div className="file-info">
-                <span
-                  onClick={() => handleDownload(file.fileURL)}
-                  className="file-name"
-                >
-                  {file.fileName}
-                </span>
-                <p className="file-details">
-                  {file.description || '(Tidak ada deskripsi)'} - <strong>Tahun: {file.year || 'N/A'}</strong>
-                </p>
-              </div>
-              <div className="file-actions">
-                <button
-                  onClick={() => handleDelete(file)}
-                  className="delete-button"
-                >
-                  Hapus
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="table-responsive">
+          <table className="file-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nama File</th>
+                <th>Deskripsi</th>
+                <th>Tahun</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files
+                .slice()
+                .sort((a, b) => a.fileName.localeCompare(b.fileName))
+                .map((file, index) => (
+                  <tr key={file.id}>
+                    <td>{index + 1}</td>
+                    <td>
+                        <span
+                            onClick={() => handleDownload(file.fileURL)}
+                            className="file-name-link">
+                            {getFileIcon(file.fileName)} {file.fileName}
+                        </span>
+                    </td>
+                    <td>{file.description || '—'}</td>
+                    <td>{file.year || 'N/A'}</td>
+                    <td>
+                      <button
+                        onClick={() => handleDelete(file)}
+                        className="delete-button small"
+                      >
+                        Hapus
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

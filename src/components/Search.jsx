@@ -13,7 +13,7 @@ function Search({ onSearch }) {
 
   return (
     <div className="form-card">
-      <h3>Cari File</h3>
+      <h3>🔍Cari File</h3>
       <form onSubmit={handleSearch} className="form-layout">
         <input
           type="text"

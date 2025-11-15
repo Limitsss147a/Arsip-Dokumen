@@ -53,7 +53,7 @@ function FileUpload() {
 
   return (
     <div className="form-card">
-      <h3>Upload File Baru</h3>
+      <h3>📤Upload File Baru</h3>
       <form onSubmit={handleUpload} className="form-layout">
         <input
           id="file-input"
@@ -86,7 +86,11 @@ function FileUpload() {
           {loading ? 'Mengunggah...' : 'Upload'}
         </button>
       </form>
-      {message && <p className="upload-message">{message}</p>}
+      {message && (
+        <p className={`upload-message ${message.includes('berhasil') ? 'success' : 'error'}`}>
+          {message}
+        </p>
+      )}
     </div>
   );
 }
