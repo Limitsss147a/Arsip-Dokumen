@@ -4,13 +4,12 @@ import { supabase } from '../supabaseClient.js';
 function FileList({ searchQuery }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [preview, setPreview] = useState(null); // { type: 'image' | 'text', url?: string, content?: string, name: string }
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     fetchFiles();
   }, [searchQuery]);
-
-  const [preview, setPreview] = useState(null); // { url, type, name }
-  const [previewLoading, setPreviewLoading] = useState(false);
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -32,6 +31,7 @@ function FileList({ searchQuery }) {
     }
   };
 
+  // === HANDLE DOWNLOAD (untuk file yang tidak bisa di-preview) ===
   const handleDownload = async (filePath) => {
     try {
       const { data, error } = await supabase.storage
@@ -41,6 +41,38 @@ function FileList({ searchQuery }) {
       window.open(data.signedUrl, '_blank');
     } catch (error) {
       alert('Gagal membuka file.');
+    }
+  };
+
+  // === HANDLE PREVIEW (klik file) ===
+  const handlePreview = async (file) => {
+    const ext = file.fileName.split('.').pop()?.toLowerCase() || '';
+
+    // Jenis file yang bisa di-preview: gambar & teks
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'txt', 'md'].includes(ext)) {
+      setPreviewLoading(true);
+      try {
+        const { data, error } = await supabase.storage
+          .from('files')
+          .createSignedUrl(file.fileURL, 300); // URL berlaku 5 menit
+
+        if (error) throw error;
+
+        if (['txt', 'md'].includes(ext)) {
+          const response = await fetch(data.signedUrl);
+          const text = await response.text();
+          setPreview({ type: 'text', content: text, name: file.fileName });
+        } else {
+          setPreview({ type: 'image', url: data.signedUrl, name: file.fileName });
+        }
+      } catch (err) {
+        alert('Gagal memuat preview.');
+      } finally {
+        setPreviewLoading(false);
+      }
+    } else {
+      // File lain (PDF, DOCX, ZIP, dll) → buka di tab baru
+      handleDownload(file.fileURL);
     }
   };
 
@@ -58,7 +90,30 @@ function FileList({ searchQuery }) {
     }
   };
 
-  // Tampilkan skeleton saat loading
+  // === GET ICON BY EXTENSION ===
+  const getFileIcon = (fileName) => {
+    const ext = fileName.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'pdf': return '📄';
+      case 'doc':
+      case 'docx': return '📝';
+      case 'xls':
+      case 'xlsx': return '📊';
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'webp': return '🖼️';
+      case 'txt':
+      case 'md': return '📃';
+      case 'zip':
+      case 'rar':
+      case '7z': return '📦';
+      default: return '📎';
+    }
+  };
+
+  // === LOADING SKELETON ===
   if (loading) {
     return (
       <div className="skeleton-table">
@@ -68,35 +123,6 @@ function FileList({ searchQuery }) {
       </div>
     );
   }
-
-  const getFileIcon = (fileName) => {
-    const ext = fileName.split('.').pop()?.toLowerCase() || '';
-    switch (ext) {
-      case 'pdf':
-        return '📄';
-      case 'doc':
-      case 'docx':
-        return '📝';
-      case 'xls':
-      case 'xlsx':
-        return '📊';
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
-      case 'webp':
-        return '🖼️';
-      case 'txt':
-      case 'md':
-        return '📃';
-      case 'zip':
-      case 'rar':
-      case '7z':
-        return '📦';
-      default:
-        return '📎';
-    }
-  };
 
   return (
     <div className="file-list-container">
@@ -123,11 +149,12 @@ function FileList({ searchQuery }) {
                   <tr key={file.id}>
                     <td>{index + 1}</td>
                     <td>
-                        <span
-                            onClick={() => handleDownload(file.fileURL)}
-                            className="file-name-link">
-                            {getFileIcon(file.fileName)} {file.fileName}
-                        </span>
+                      <span
+                        onClick={() => handlePreview(file)}
+                        className="file-name-link"
+                      >
+                        {getFileIcon(file.fileName)} {file.fileName}
+                      </span>
                     </td>
                     <td>{file.description || '—'}</td>
                     <td>{file.year || 'N/A'}</td>
@@ -143,6 +170,33 @@ function FileList({ searchQuery }) {
                 ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* === MODAL PREVIEW === */}
+      {preview && (
+        <div className="preview-modal-overlay" onClick={() => setPreview(null)}>
+          <div className="preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="preview-header">
+              <h3>👁️ Preview: {preview.name}</h3>
+              <button className="close-preview" onClick={() => setPreview(null)}>
+                ×
+              </button>
+            </div>
+            <div className="preview-content">
+              {previewLoading ? (
+                <p>Memuat preview...</p>
+              ) : preview.type === 'image' ? (
+                <img
+                  src={preview.url}
+                  alt={preview.name}
+                  className="preview-image"
+                />
+              ) : preview.type === 'text' ? (
+                <pre className="preview-text">{preview.content}</pre>
+              ) : null}
+            </div>
+          </div>
         </div>
       )}
     </div>

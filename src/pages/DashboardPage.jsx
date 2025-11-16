@@ -47,7 +47,7 @@ function DashboardPage() {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1 className="dashboard-title">📁 Dashboard Penyimpanan Pribadi</h1>
+        <h1 className="dashboard-title">📁 Dashboard Anggaran Kabupaten Sumedang</h1>
         <div className="header-actions">
           <button
             onClick={toggleDarkMode}
